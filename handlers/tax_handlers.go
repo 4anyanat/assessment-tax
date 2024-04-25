@@ -34,14 +34,14 @@ func Tax_Cal_Handler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, "InvalidInput: Inputs are incorrect")
 	}
 
-	taxCalced := taxCalc(taxin.TotalIncome, taxin.Wht)
+	taxCalced := taxCalc(taxin.TotalIncome, taxin.Wht, taxin.Allowances[0].Amount)
 
 	return c.JSON(http.StatusOK, map[string]float64{
 		"tax": taxCalced,
 	})
 }
 
-func taxCalc(totalIncome float64, wht float64) float64 {
+func taxCalc(totalIncome float64, wht float64, allowanceAmount float64) float64 {
 
 	taxrate := taxRate{
 		rate35:      0.35,
@@ -55,6 +55,7 @@ func taxCalc(totalIncome float64, wht float64) float64 {
 	tax := 0.0
 	stepVal := 0.0
 	totalIncome -= float64(taxrate.personalDec)
+	totalIncome -= allowanceAmount
 
 	if totalIncome > 2000000 {
 		stepVal = totalIncome - 2000000
@@ -99,6 +100,7 @@ func taxCalc(totalIncome float64, wht float64) float64 {
 	} else if totalIncome >= 0 && totalIncome <= 150000 {
 		tax = taxrate.rate0
 	}
+	
 	tax -= wht
 
 	return tax
