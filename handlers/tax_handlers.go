@@ -35,14 +35,14 @@ func Tax_Cal_Handler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, "InvalidInput: Inputs are not positive")
 	}
 
-	taxCalced := taxCalc(taxin.TotalIncome)
+	taxCalced := taxCalc(taxin.TotalIncome, taxin.Wht)
 
 	return c.JSON(http.StatusOK, map[string]float64{
 		"tax": taxCalced,
 	})
 }
 
-func taxCalc(totalIncome float64) float64 {
+func taxCalc(totalIncome float64, wht float64) float64 {
 
 	taxrate := taxRate{
 		rate35:      0.35,
@@ -100,6 +100,7 @@ func taxCalc(totalIncome float64) float64 {
 	} else if totalIncome >= 0 && totalIncome <= 150000 {
 		tax = taxrate.rate0
 	}
+	tax -= wht
 
 	return tax
 }

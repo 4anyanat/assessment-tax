@@ -6,5 +6,6 @@ import (
 )
 
 func Router(e *echo.Echo) {
+	e.GET("/health", handlers.HealthHandler)
 	e.POST("/tax/calculations", handlers.Tax_Cal_Handler)
 }
