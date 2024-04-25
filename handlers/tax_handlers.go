@@ -24,15 +24,14 @@ func Tax_Cal_Handler(c echo.Context) error {
 	}
 
 	checknum := (reflect.TypeOf(taxin.TotalIncome).Kind() == reflect.String) || (reflect.TypeOf(taxin.Wht).Kind() == reflect.String) || (reflect.TypeOf(taxin.Allowances[0].Amount).Kind() == reflect.String)
-	checkstr := (reflect.TypeOf(taxin.Allowances[0].AllowanceType).Kind() == reflect.String)
 
-	if checknum && !checkstr {
+	if checknum{
 
 		return c.JSON(http.StatusBadRequest, "InvalidInput: Invalid input types")
 	}
-	if taxin.TotalIncome < 0 || taxin.Wht < 0 || taxin.Allowances[0].Amount < 0 {
+	if (taxin.TotalIncome < 0) || (taxin.Wht < 0) || (taxin.Wht > taxin.TotalIncome) || (taxin.Allowances[0].Amount < 0) {
 
-		return c.JSON(http.StatusBadRequest, "InvalidInput: Inputs are not positive")
+		return c.JSON(http.StatusBadRequest, "InvalidInput: Inputs are incorrect")
 	}
 
 	taxCalced := taxCalc(taxin.TotalIncome, taxin.Wht)
