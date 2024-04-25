@@ -11,6 +11,16 @@ type allowance struct {
 	Amount        float64 `json:"amount"`
 }
 
+type taxOutput struct {
+	Tax 		float64 `json:"tax"`
+	TaxLevel []taxLevel `json:"taxLevel"`
+}
+
+type taxLevel struct {
+	Level 	string 	`json:"level"`
+	Tax		float64 `json:"tax"`
+}
+
 type errMsg struct {
 	Message string `json:"message"`
 }
