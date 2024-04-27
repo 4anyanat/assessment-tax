@@ -1,6 +1,9 @@
 package routes
 
 import (
+	"os"
+	"fmt"
+
 	"github.com/4anyanat/assessment-tax/handlers"
 	"github.com/4anyanat/assessment-tax/database"
 	"github.com/labstack/echo/v4"
@@ -15,8 +18,16 @@ func Router(e *echo.Echo) {
 
 	g := e.Group("/admin")
 
+	adminUsername := os.Getenv("ADMIN_USERNAME")
+	adminPassword := os.Getenv("ADMIN_PASSWORD")
+
+	if adminUsername != "" && adminPassword != ""{
+		fmt.Println("Credentials are available")
+	} else {
+		fmt.Println("Credentials are not available")
+	}
 	g.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
-		if username == "adminTax" && password == "admin!" {
+		if username == adminUsername && password == adminPassword {
 			return true, nil
 		}
 		return false, nil

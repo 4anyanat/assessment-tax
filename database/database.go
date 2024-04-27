@@ -37,13 +37,4 @@ func DatabaseInit() {
 	}
 
 	fmt.Println("Successful")
-
-	// var personalDeduction = 60000.0
-
-	// row := db.QueryRow("INSERT INTO taxes (personalDeduction) values ($1) RETURNING personalDeduction", 60000.0)
-	// // db.Exec("DELETE FROM taxes")
-	// err = row.Scan(&personalDeduction)
-	// if err != nil {
-	// 	log.Fatal("Error", err)
-	// }
 }
