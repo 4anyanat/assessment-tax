@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/4anyanat/assessment-tax/routes"
+	"github.com/4anyanat/assessment-tax/database"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -14,6 +15,7 @@ func main() {
 	e.Use(middleware.Recover())
 
 	routes.Router(e)
+	database.DatabaseInit()
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
