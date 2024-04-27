@@ -1,8 +1,13 @@
 package routes
 
 import (
+	"os"
+	"fmt"
+
 	"github.com/4anyanat/assessment-tax/handlers"
+	"github.com/4anyanat/assessment-tax/database"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func Router(e *echo.Echo) {
@@ -10,4 +15,23 @@ func Router(e *echo.Echo) {
 	e.GET("/health", handlers.HealthHandler)
 	e.POST("/tax/calculations", handlers.Tax_Cal_Handler)
 	e.POST("/tax/calculations/upload-csv", handlers.Tax_Csv_Handler)
+
+	g := e.Group("/admin")
+
+	adminUsername := os.Getenv("ADMIN_USERNAME")
+	adminPassword := os.Getenv("ADMIN_PASSWORD")
+
+	if adminUsername != "" && adminPassword != ""{
+		fmt.Println("Credentials are available")
+	} else {
+		fmt.Println("Credentials are not available")
+	}
+	g.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
+		if username == adminUsername && password == adminPassword {
+			return true, nil
+		}
+		return false, nil
+	}))
+
+	g.POST("/deductions/personal", database.TaxesUpdate)
 }

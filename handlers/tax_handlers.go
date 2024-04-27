@@ -1,7 +1,10 @@
 package handlers
 
 import (
+	"database/sql"
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/labstack/echo/v4"
 )
@@ -40,9 +43,9 @@ func taxCalc(totalIncome float64, wht float64, allowances float64) taxCalcInfo {
 		rate15:      0.15,
 		rate10:      0.10,
 		rate0:       0.0,
-		personalDec: 60000.0,
+		personalDec: updatePersonal(),
 	}
-
+	
 	// Declare taxes for each level
 	var (
 		taxLvl35 float64
@@ -213,5 +216,26 @@ func checkAllowance(allowances []allowance) float64 {
 		}
 	}
 	allowanceAll := donationAll + kreceiptAll
+
 	return allowanceAll
+}
+
+func updatePersonal() float64 {
+	url := os.Getenv("DATABASE_URL")
+
+	db, err := sql.Open("postgres", url)
+	if err != nil {
+		log.Fatal("Database connection error", err)
+	}
+	defer db.Close()
+
+	var updatedPersonal float64
+
+	row := db.QueryRow("SELECT personalDeduction FROM taxes")
+    err = row.Scan(&updatedPersonal)
+    if err != nil {
+        log.Fatal("Error fetching personal deduction value", err)
+    }
+
+	return updatedPersonal
 }
