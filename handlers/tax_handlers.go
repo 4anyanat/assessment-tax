@@ -27,15 +27,6 @@ func Tax_Cal_Handler(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, "InvalidInput: Inputs are incorrect")
 	}
 
-	// type TaxCalculator func(totalIncome float64, wht float64, allowances float64) taxCalcInfo
-
-	// var calculateTax TaxCalculator = taxCalc
-
-	// totalAllowance := checkAllowance(taxin.Allowances)
-
-	// // Execute tax calculation
-	// taxCalced := calculateTax(taxin.TotalIncome, taxin.Wht, totalAllowance)
-
 	taxCalced := CalculateTax(*taxin)
 
 	return c.JSON(http.StatusOK, taxCalced)
@@ -64,6 +55,7 @@ func taxCalc(totalIncome float64, wht float64, allowances float64) taxCalcInfo {
 	var taxOutput taxCalcInfo
 	var taxType   string
 	var refund	  float64
+	noRefund := 0.0
 
 	// Initialization
 	totalTax := 0.0
@@ -104,7 +96,7 @@ func taxCalc(totalIncome float64, wht float64, allowances float64) taxCalcInfo {
 	// Calcaulate the total tax
 	if totalTax >= wht {
 		totalTax -= wht
-		refund = 0
+		refund = noRefund
 		taxType = "tax"
 	}else {
 		refund = wht - totalTax
@@ -196,18 +188,30 @@ func taxRefundOutput(taxInfo taxCalcInfo) taxRefundInfo {
 
 func checkAllowance(allowances []allowance) float64 {
 	var donationAll float64
+	var kreceiptAll	float64
+
+	// Donation limit setting >> Max. 100,000 Bahts
+	donationLim := 100000.0
+	// K-receipt limit default setting >> Max. 50,000 Bahts
+	kreceiptLim := 50000.0
+
+	posNo := 0.0
 	
 	for _, allowance := range allowances {
-		// Donation limit setting >> Max. 10,000 Bahts
 		if allowance.AllowanceType == "donation"{
-			if allowance.Amount >= 100000{
-				donationAll = 100000.0
-				return donationAll
-			}else if allowance.Amount < 100000 && allowance.Amount >= 0{
+			if allowance.Amount >= donationLim{
+				donationAll = donationLim
+			}else if allowance.Amount < donationLim && allowance.Amount >= posNo{
 				donationAll = allowance.Amount
-				return donationAll
+			}
+		}else if allowance.AllowanceType == "k-receipt"{
+			if allowance.Amount >= kreceiptLim{
+				kreceiptAll = kreceiptLim
+			}else if allowance.Amount < kreceiptLim && allowance.Amount >= posNo{
+				kreceiptAll = allowance.Amount
 			}
 		}
 	}
-	return 0
+	allowanceAll := donationAll + kreceiptAll
+	return allowanceAll
 }
