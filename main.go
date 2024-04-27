@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"github.com/4anyanat/assessment-tax/routes"
 	"github.com/4anyanat/assessment-tax/database"
 	"github.com/labstack/echo/v4"
@@ -17,5 +18,8 @@ func main() {
 	routes.Router(e)
 	database.DatabaseInit()
 
-	e.Logger.Fatal(e.Start(":8080"))
+	// Get port number from environment variable PORT
+	port := os.Getenv("PORT")
+
+	e.Logger.Fatal(e.Start(port))
 }

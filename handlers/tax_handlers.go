@@ -35,6 +35,7 @@ func Tax_Cal_Handler(c echo.Context) error {
 	return c.JSON(http.StatusOK, taxCalced)
 }
 
+// Tax calculation logic
 func taxCalc(totalIncome float64, wht float64, allowances float64) taxCalcInfo {
 	// Declare tax level rates
 	taxrate := taxRate{
@@ -119,6 +120,7 @@ func taxCalc(totalIncome float64, wht float64, allowances float64) taxCalcInfo {
 	return taxOutput
 }
 
+// Tax calculation
 func CalculateTax(taxin taxInput) TaxOutput {
 	var taxOutput taxOutputInfo
 	var taxRefundInfo taxRefundInfo
@@ -147,6 +149,7 @@ func (t taxRefundInfo) GetOutput() interface{} {
 	return t
 }
 
+// Output of no tax refund case
 func taxLvlOutput(taxInfo taxCalcInfo) taxOutputInfo {
 	var taxOutput taxOutputInfo
 
@@ -168,6 +171,7 @@ func taxLvlOutput(taxInfo taxCalcInfo) taxOutputInfo {
 	return taxOutput
 }
 
+// Output of tax refund case
 func taxRefundOutput(taxInfo taxCalcInfo) taxRefundInfo {
 	var taxOutput taxRefundInfo
 
@@ -189,6 +193,7 @@ func taxRefundOutput(taxInfo taxCalcInfo) taxRefundInfo {
 	return taxOutput
 }
 
+// Verify and acquire the total amount of allowance
 func checkAllowance(allowances []allowance) float64 {
 	var donationAll float64
 	var kreceiptAll	float64
@@ -196,7 +201,7 @@ func checkAllowance(allowances []allowance) float64 {
 	// Donation limit setting >> Max. 100,000 Bahts
 	donationLim := 100000.0
 	// K-receipt limit default setting >> Max. 50,000 Bahts
-	kreceiptLim := 50000.0
+	kreceiptLim := updateKReceipt()
 
 	posNo := 0.0
 	
@@ -220,6 +225,7 @@ func checkAllowance(allowances []allowance) float64 {
 	return allowanceAll
 }
 
+// Get updated amount of personal deduction from the database
 func updatePersonal() float64 {
 	url := os.Getenv("DATABASE_URL")
 
@@ -238,4 +244,25 @@ func updatePersonal() float64 {
     }
 
 	return updatedPersonal
+}
+
+// Get updated amount of k-receipt allowance from the database
+func updateKReceipt() float64 {
+	url := os.Getenv("DATABASE_URL")
+
+	db, err := sql.Open("postgres", url)
+	if err != nil {
+		log.Fatal("Database connection error", err)
+	}
+	defer db.Close()
+
+	var updatedKReceipt float64
+
+	row := db.QueryRow("SELECT kReceipt FROM taxes")
+    err = row.Scan(&updatedKReceipt)
+    if err != nil {
+        log.Fatal("Error fetching k-receipt allowance value", err)
+    }
+
+	return updatedKReceipt
 }
