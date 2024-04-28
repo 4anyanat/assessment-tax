@@ -2,13 +2,13 @@ package main
 
 import (
 	"context"
+	"net/http"
 	"os"
 	"os/signal"
-	"net/http"
 	"time"
-	
-	"github.com/4anyanat/assessment-tax/routes"
+
 	"github.com/4anyanat/assessment-tax/database"
+	"github.com/4anyanat/assessment-tax/routes"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -33,7 +33,7 @@ func main() {
 
 	go func() {
 		e.Logger.Fatal(e.Start(port))
-		if err := e.Start(port); err != nil && err != http.ErrServerClosed { 
+		if err := e.Start(port); err != nil && err != http.ErrServerClosed {
 			e.Logger.Fatal("shutting down the server")
 		}
 	}()
