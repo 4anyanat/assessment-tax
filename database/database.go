@@ -28,25 +28,41 @@ func DatabaseInit() {
 	}
 	defer db.Close()
 
-	// Create table taxes if not already exists
-	createDB := `
-	CREATE TABLE IF NOT EXISTS taxes ( personalDeduction FLOAT, kReceipt FLOAT )
-	`
+	createTableIfNotExists(db)
 
-	_, err = db.Exec(createDB)
-	if err != nil{
+	if !hasRows(db, "taxes") {
+		// Insert default values if no rows are present
+		insertDefaults(db)
+	}
+	fmt.Println("Database initialization successful")
+}
+
+func createTableIfNotExists(db *sql.DB) {
+	query := `
+	CREATE TABLE IF NOT EXISTS taxes (
+		personalDeduction FLOAT, 
+		kReceipt FLOAT
+	)`
+	if _, err := db.Exec(query); err != nil {
 		log.Fatal("Table creation error", err)
 	}
+}
 
-	// // Insert new row of table (personalDeduction, kReceipt)
-	// stmt, err := db.Prepare("INSERT INTO taxes (personalDeduction, kReceipt) VALUES ($1, $2)")
-	// if err != nil {
-	// 	fmt.Println("Error:", err)
-	// }
-	// defer stmt.Close()
+func hasRows(db *sql.DB, tableName string) bool {
+	var exists bool
+	query := fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM %s LIMIT 1)", tableName)
+	err := db.QueryRow(query).Scan(&exists)
+	if err != nil {
+		log.Fatal("Error checking for rows", err)
+	}
+	return exists
+}
 
-	// row, _ := stmt.Exec(60000.0, 0.0)
-	// fmt.Println(row.RowsAffected())
-
-	fmt.Println("Successful")
+func insertDefaults(db *sql.DB) {
+	query := "INSERT INTO taxes (personalDeduction, kReceipt) VALUES ($1, $2)"
+	_, err := db.Exec(query, 60000.0, 50000.0)
+	if err != nil {
+		log.Fatal("Error inserting default values", err)
+	}
+	fmt.Println("Inserted default values")
 }
